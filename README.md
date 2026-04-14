@@ -67,10 +67,37 @@ All configuration is done via the `.env` file:
 
 ## Deployment
 
-1. Download the latest `Kiosk_App.exe` from [Releases](../../releases)
-2. Place `.env` file in the same directory as the exe
-3. Set up Windows to auto-launch the app on boot
-4. Configure the PC in kiosk mode
+### First-Time Setup
+
+1. Download `Kiosk_App.exe` and `.env.template` from the latest [Release](../../releases)
+2. Place both files in a folder on the kiosk PC (e.g., `C:\Kiosk`)
+3. Rename `.env.template` to `.env`
+4. Edit `.env` and fill in the actual credentials:
+   - `SMTP_USER` — the Office 365 account used to send emails (e.g., `kiosk@your-school.org`)
+   - `SMTP_PASSWORD` — the password for that account
+   - `DB_USERNAME` — PostgreSQL database username
+   - `DB_PASSWORD` — PostgreSQL database password
+5. Double-click `Kiosk_App.exe` to verify it starts (Chrome should open in kiosk mode)
+6. To auto-launch on boot, add a shortcut to `Kiosk_App.exe` in the Windows Startup folder:
+   - Press `Win + R`, type `shell:startup`, press Enter
+   - Paste a shortcut to `Kiosk_App.exe` in that folder
+7. Configure Windows kiosk mode or auto-login as needed
+
+### Updating to a New Version
+
+1. On the kiosk PC, go to the [Releases](../../releases) page
+2. Download the latest `Kiosk_App.exe`
+3. Close the running kiosk app (or reboot the PC)
+4. Replace the old `Kiosk_App.exe` with the new one — keep the existing `.env` file as-is
+5. Restart the PC (it will auto-launch with the new version)
+
+### Important Notes
+
+- The `.env` file contains credentials and is **not** included in the repository — it lives only on the kiosk PC
+- The exe is self-contained — no Python or dependency installation required
+- The app requires Chrome to be installed on the kiosk PC
+- The PostgreSQL ODBC driver (`PostgreSQL Unicode(x64)`) must be installed on the kiosk PC
+- Logs are written to `kiosk.log` in the same directory as the exe
 
 ## Troubleshooting
 
