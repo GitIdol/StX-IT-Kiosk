@@ -1,0 +1,144 @@
+/* St. Xavier IT Helpdesk Kiosk Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #1a365d 0%, #2c5282 50%, #1a365d 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a202c;
+}
+
+.container {
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 24px;
+    padding: 60px 40px;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+}
+
+.card.closed {
+    background: linear-gradient(180deg, #ffffff 0%, #f7fafc 100%);
+}
+
+.logo {
+    width: 160px;
+    height: auto;
+    margin-bottom: 40px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a365d;
+    margin-bottom: 16px;
+}
+
+.instruction {
+    font-size: 1.4rem;
+    color: #4a5568;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.instruction.small {
+    font-size: 1rem;
+    color: #718096;
+    margin-top: 30px;
+    margin-bottom: 0;
+}
+
+.hours {
+    font-size: 1.1rem;
+    color: #2d3748;
+    line-height: 1.8;
+    background: #edf2f7;
+    padding: 20px 30px;
+    border-radius: 12px;
+    display: inline-block;
+}
+
+/* Icons */
+.scanner-icon,
+.success-icon,
+.error-icon,
+.closed-icon {
+    margin-bottom: 30px;
+}
+
+.scanner-icon svg {
+    color: #3182ce;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.success-icon svg {
+    color: #38a169;
+}
+
+.error-icon svg {
+    color: #e53e3e;
+}
+
+.closed-icon svg {
+    color: #718096;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+/* Views */
+.view {
+    display: none;
+}
+
+.view.active {
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hidden RFID Input */
+#rfid-input {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .card {
+        padding: 40px 24px;
+        border-radius: 16px;
+    }
+
+    .logo {
+        width: 120px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .instruction {
+        font-size: 1.2rem;
+    }
+}
