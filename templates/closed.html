@@ -8,26 +8,27 @@
     <meta http-equiv="refresh" content="60">
 </head>
 <body>
-    <div class="container">
-        <div class="card closed">
-            <img src="{{ url_for('static', filename='st_xavier_logo.png') }}" alt="St. Xavier Logo" class="logo">
+    <div class="fullscreen">
+        <img src="{{ url_for('static', filename='st_xavier_logo.png') }}" alt="St. Xavier Logo" class="logo">
 
-            <div class="closed-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12 6 12 12 16 14"/>
-                </svg>
-            </div>
-
-            <h1>IT Help Desk</h1>
-            <p class="instruction">The Help Desk is currently closed.</p>
-            <p class="hours">
-                <strong>Hours of Operation</strong><br>
-                Monday - Friday<br>
-                7:00 AM - 4:00 PM
-            </p>
-            <p class="instruction small">For urgent issues, please email<br>helpdesk@stxavier.org</p>
+        <div class="closed-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
         </div>
+
+        <h1>The IT Help Desk<br>Is Currently Closed</h1>
+
+        <div class="hours-box">
+            <div class="hours-label">Hours of Operation</div>
+            <div class="hours-text">
+                Monday &ndash; Friday<br>
+                7:00 AM &ndash; 4:00 PM
+            </div>
+        </div>
+
+        <p class="help-text">For urgent issues, please email<br><a href="mailto:helpdesk@stxavier.org">helpdesk@stxavier.org</a></p>
     </div>
 </body>
 </html>

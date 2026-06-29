@@ -7,49 +7,31 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <div class="container">
-        <div class="card">
-            <img src="{{ url_for('static', filename='st_xavier_logo.png') }}" alt="St. Xavier Logo" class="logo">
+    <div class="fullscreen">
+        <img src="{{ url_for('static', filename='st_xavier_logo.png') }}" alt="St. Xavier Logo" class="logo">
 
-            <div id="check-in-view" class="view active">
-                <h1>IT Help Desk</h1>
-                <p class="instruction">Please scan your ID badge on the reader below</p>
-                <div class="scanner-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="4" width="18" height="16" rx="2"/>
-                        <line x1="7" y1="8" x2="17" y2="8"/>
-                        <line x1="7" y1="12" x2="17" y2="12"/>
-                        <line x1="7" y1="16" x2="13" y2="16"/>
-                    </svg>
-                </div>
+        <div id="check-in-view" class="view active">
+            <h1>Please Check In By Scanning<br>Your ID Badge On The Reader Below</h1>
+            <div class="arrow-down">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <polyline points="19 12 12 19 5 12"/>
+                </svg>
             </div>
-
-            <div id="success-view" class="view">
-                <div class="success-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                        <polyline points="22 4 12 14.01 9 11.01"/>
-                    </svg>
-                </div>
-                <h1>Thank You, <span id="student-name"></span>!</h1>
-                <p class="instruction">Please wait here. An IT specialist will call your name shortly.</p>
-            </div>
-
-            <div id="error-view" class="view">
-                <div class="error-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                </div>
-                <h1>Oops!</h1>
-                <p class="instruction" id="error-message">Something went wrong. Please try again.</p>
-            </div>
-
-            <!-- Hidden input to capture RFID scan -->
-            <input type="text" id="rfid-input" autocomplete="off" autofocus>
         </div>
+
+        <div id="success-view" class="view">
+            <h1 class="welcome">Welcome <span id="student-name"></span>!</h1>
+            <p class="instruction">Please Proceed To The Next<br>Available IT Specialist</p>
+        </div>
+
+        <div id="error-view" class="view">
+            <h1>Badge Not Recognized</h1>
+            <p class="instruction">Please see an IT specialist<br>for help.</p>
+        </div>
+
+        <!-- Hidden input to capture RFID scan -->
+        <input type="text" id="rfid-input" autocomplete="off" autofocus>
     </div>
 
     <script>
@@ -58,7 +40,6 @@
         const successView = document.getElementById('success-view');
         const errorView = document.getElementById('error-view');
         const studentName = document.getElementById('student-name');
-        const errorMessage = document.getElementById('error-message');
 
         let isProcessing = false;
 
@@ -79,11 +60,10 @@
         function showSuccess(firstname) {
             studentName.textContent = firstname;
             showView(successView);
-            setTimeout(resetToCheckIn, 5000);
+            setTimeout(resetToCheckIn, 7000);
         }
 
-        function showError(message) {
-            errorMessage.textContent = message || 'Something went wrong. Please try again.';
+        function showError() {
             showView(errorView);
             setTimeout(resetToCheckIn, 4000);
         }
@@ -104,15 +84,14 @@
                 if (data.success) {
                     showSuccess(data.firstname);
                 } else {
-                    showError(data.message);
+                    showError();
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showError('Connection error. Please try again.');
+                showError();
             }
         }
 
-        // Handle RFID scan (triggered by Enter key from scanner)
         rfidInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 const rfid = rfidInput.value.trim();
@@ -122,7 +101,6 @@
             }
         });
 
-        // Also handle change event as backup
         rfidInput.addEventListener('change', function() {
             const rfid = rfidInput.value.trim();
             if (rfid) {
@@ -130,24 +108,20 @@
             }
         });
 
-        // Keep focus on input
         setInterval(() => {
             if (document.activeElement !== rfidInput && !isProcessing) {
                 rfidInput.focus();
             }
         }, 500);
 
-        // Prevent keyboard shortcuts in kiosk mode
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey || e.altKey || e.metaKey) {
                 e.preventDefault();
             }
         });
 
-        // Prevent right-click
         document.addEventListener('contextmenu', e => e.preventDefault());
 
-        // Initialize
         resetToCheckIn();
     </script>
 </body>
