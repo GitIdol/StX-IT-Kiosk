@@ -76,6 +76,23 @@ All configuration is done via the `.env` file. The app will not start without th
 | `CLOSE_HOUR` | Hour helpdesk closes (24h format) | 16 | |
 | `OPEN_DAYS` | Days open (0=Mon, 1=Tue, ..., 4=Fri) | 0,1,2,3,4 | |
 
+### Helpdesk Schedule
+
+`OPEN_HOUR`, `CLOSE_HOUR`, and `OPEN_DAYS` control two things at once: when the kiosk accepts check-ins, and the hours printed on the Closed screen. Change them in `.env` and you're done — the Closed screen text is generated from those same values, so there is no second copy to keep in sync.
+
+Hours are 24-hour numbers and get formatted for display automatically (`7` becomes "7:00 AM", `16` becomes "4:00 PM"). The helpdesk opens at the top of `OPEN_HOUR` and closes at the top of `CLOSE_HOUR`, so with the defaults the last minute open is 3:59 PM.
+
+Days are numbered 0=Monday through 6=Sunday, and consecutive days are collapsed into a range:
+
+| `OPEN_DAYS` | Closed screen shows |
+|-------------|---------------------|
+| `0,1,2,3,4` | Monday – Friday |
+| `0,1` | Monday & Tuesday |
+| `0,2,4` | Monday, Wednesday, Friday |
+| `0,1,2,4` | Monday – Wednesday, Friday |
+
+The formatting is done by `format_hour()` and `format_open_days()` in `app.py`. The `closed.html` template just displays what it's handed, so schedule changes never require touching the HTML.
+
 ## Deployment
 
 ### First-Time Setup
@@ -143,7 +160,7 @@ This app is simple by design — all the logic is in a handful of well-commented
 | Colors, fonts, sizes | `static/styles.css` — see the top comment block for key values |
 | Logo | Replace `static/st_xavier_logo.png` (use a dark image on transparent background) |
 | Screen text or layout | `templates/check_in.html` or `templates/closed.html` |
-| Helpdesk hours/schedule | `.env` file on the kiosk PC (OPEN_HOUR, CLOSE_HOUR, OPEN_DAYS) |
+| Helpdesk hours/schedule | `.env` file on the kiosk PC (OPEN_HOUR, CLOSE_HOUR, OPEN_DAYS) — the Closed screen text follows automatically; see [Helpdesk Schedule](#helpdesk-schedule) |
 | Email/ticket behavior | `app.py` — look at the `send_email()` and `process_rfid()` functions |
 | Database query | `app.py` — look at `get_user_info_from_cardnumber()` |
 | Success screen duration | `templates/check_in.html` — search for `setTimeout` (currently 7000ms) |

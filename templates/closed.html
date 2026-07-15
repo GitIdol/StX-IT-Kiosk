@@ -44,14 +44,14 @@
         <h1>The IT Help Desk<br>Is Currently Closed</h1>
 
         <!-- Hours box — shows when the helpdesk is open.
-             NOTE: These hours are displayed as static text here. If you change
-             OPEN_HOUR, CLOSE_HOUR, or OPEN_DAYS in the .env file, you should
-             also update this text to match. -->
+             These values come from OPEN_DAYS/OPEN_HOUR/CLOSE_HOUR in .env,
+             formatted by format_open_days() and format_hour() in app.py.
+             Change the schedule in .env and this text follows automatically. -->
         <div class="hours-box">
             <div class="hours-label">Hours of Operation</div>
             <div class="hours-text">
-                Monday &ndash; Friday<br>
-                7:00 AM &ndash; 4:00 PM
+                {{ days_text }}<br>
+                {{ open_time }} &ndash; {{ close_time }}
             </div>
         </div>
 

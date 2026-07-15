@@ -101,6 +101,9 @@ OPEN_HOUR = int(os.getenv('OPEN_HOUR', '7'))                            # Opens 
 CLOSE_HOUR = int(os.getenv('CLOSE_HOUR', '16'))                         # Closes at 4:00 PM (16:00)
 OPEN_DAYS = [int(d) for d in os.getenv('OPEN_DAYS', '0,1,2,3,4').split(',')]  # Mon-Fri
 
+# Day names indexed by Python's weekday numbering (0=Monday ... 6=Sunday).
+DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
 # =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
@@ -124,6 +127,60 @@ def is_helpdesk_open():
     if current_hour < OPEN_HOUR or current_hour >= CLOSE_HOUR:
         return False
     return True
+
+
+def format_hour(hour_24):
+    """
+    Turn a 24-hour number from the .env file into a readable time string
+    for display on the closed page. 7 -> "7:00 AM", 16 -> "4:00 PM".
+    """
+    suffix = 'AM' if hour_24 < 12 else 'PM'
+    hour_12 = hour_24 % 12
+    if hour_12 == 0:
+        hour_12 = 12  # Midnight and noon both land on 12, not 0
+    return f'{hour_12}:00 {suffix}'
+
+
+def format_open_days(days):
+    """
+    Turn the OPEN_DAYS list into a readable string for the closed page.
+
+    Consecutive days are collapsed into a range, so the common Mon-Fri case
+    reads "Monday - Friday" rather than listing all five. Non-consecutive
+    days are separated by commas.
+
+        [0,1,2,3,4]   -> "Monday - Friday"
+        [0,1]         -> "Monday & Tuesday"
+        [0,2,4]       -> "Monday, Wednesday, Friday"
+        [0,1,2,4]     -> "Monday - Wednesday, Friday"
+
+    Anything outside 0-6 is ignored so a typo in .env can't crash the page.
+    """
+    valid_days = sorted({d for d in days if 0 <= d <= 6})
+    if not valid_days:
+        return 'By appointment only'
+
+    # Walk the sorted days and group runs of consecutive numbers together.
+    groups = []
+    start = previous = valid_days[0]
+    for day in valid_days[1:]:
+        if day == previous + 1:
+            previous = day
+        else:
+            groups.append((start, previous))
+            start = previous = day
+    groups.append((start, previous))
+
+    parts = []
+    for first, last in groups:
+        if first == last:
+            parts.append(DAY_NAMES[first])
+        elif last == first + 1:
+            # A two-day run reads better as "Monday & Tuesday" than a range
+            parts.append(f'{DAY_NAMES[first]} & {DAY_NAMES[last]}')
+        else:
+            parts.append(f'{DAY_NAMES[first]} – {DAY_NAMES[last]}')  # en dash
+    return ', '.join(parts)
 
 
 def get_user_info_from_cardnumber(cardnumber):
@@ -267,11 +324,20 @@ def index():
     If the helpdesk is closed: shows the closed screen (closed.html)
     with hours of operation. That page auto-refreshes every 60 seconds
     so it will automatically switch to check-in when the helpdesk opens.
+
+    The hours shown on the closed page are generated from the schedule in
+    .env, so changing OPEN_HOUR/CLOSE_HOUR/OPEN_DAYS updates the display
+    automatically — there is no second copy of the hours to keep in sync.
     """
     if is_helpdesk_open():
         return render_template('check_in.html')
     else:
-        return render_template('closed.html')
+        return render_template(
+            'closed.html',
+            days_text=format_open_days(OPEN_DAYS),
+            open_time=format_hour(OPEN_HOUR),
+            close_time=format_hour(CLOSE_HOUR),
+        )
 
 
 @app.route('/process_rfid', methods=['POST'])
