@@ -1,3 +1,19 @@
+<!--
+  CLOSED PAGE — Shown when the helpdesk is outside operating hours.
+
+  This page displays a simple "closed" message with the hours of operation
+  and an email address for urgent issues.
+
+  AUTO-REFRESH:
+    The <meta http-equiv="refresh" content="60"> tag makes the browser reload
+    this page every 60 seconds. When the helpdesk opens (e.g., 7:00 AM on
+    Monday), the server will serve check_in.html instead, so the page
+    automatically switches without anyone touching it.
+
+  STYLING:
+    Uses the same full-screen navy background and white text as the check-in
+    page. See static/styles.css for all styling.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,12 +21,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IT Help Desk - Closed</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <!-- Auto-refresh every 60 seconds so it switches to check-in when
+         the helpdesk opens. No user interaction needed. -->
     <meta http-equiv="refresh" content="60">
 </head>
 <body>
     <div class="fullscreen">
-        <img src="{{ url_for('static', filename='st_xavier_logo.png') }}" alt="St. Xavier Logo" class="logo">
 
+        <!-- Same logo as the check-in page for consistent branding -->
+        <img src="{{ url_for('static', filename='st_xavier_logo.png') }}" alt="St. Xavier Logo" class="logo">
+        <div class="divider"></div>
+
+        <!-- Clock icon — a visual indicator that this is about time/schedule -->
         <div class="closed-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
@@ -20,6 +43,10 @@
 
         <h1>The IT Help Desk<br>Is Currently Closed</h1>
 
+        <!-- Hours box — shows when the helpdesk is open.
+             NOTE: These hours are displayed as static text here. If you change
+             OPEN_HOUR, CLOSE_HOUR, or OPEN_DAYS in the .env file, you should
+             also update this text to match. -->
         <div class="hours-box">
             <div class="hours-label">Hours of Operation</div>
             <div class="hours-text">
@@ -28,6 +55,7 @@
             </div>
         </div>
 
+        <!-- Emergency contact for urgent issues outside business hours -->
         <p class="help-text">For urgent issues, please email<br><a href="mailto:helpdesk@stxavier.org">helpdesk@stxavier.org</a></p>
     </div>
 </body>

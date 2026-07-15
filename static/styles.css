@@ -1,23 +1,65 @@
+/* =============================================================================
+   St. Xavier IT Helpdesk Kiosk — Stylesheet
+   =============================================================================
+
+   This file controls the entire look and feel of the kiosk application.
+   Both the check-in page and the closed page use this same stylesheet.
+
+   DESIGN APPROACH:
+     Full-screen navy blue background with white text. No cards, no panels.
+     The text IS the interface — big, bold, readable from several feet away
+     on the kiosk's 21.5" 1920x1080 display.
+
+   KEY SIZING VALUES (adjust these if changing displays):
+     Logo width:       550px   (.logo)
+     Main text:        5.5rem  (h1)
+     Welcome text:     4rem    (h1.welcome)
+     Instruction text: 5.5rem  (.instruction)
+     Arrow size:       120px   (.arrow-down svg)
+
+   COLOR PALETTE:
+     --navy (#0a1e3d):       Dark navy blue — primary background
+     --navy-light (#112d5a): Slightly lighter navy — gradient endpoint
+     --blue-accent (#4a90d9): Medium blue — used for student name highlight,
+                               arrow glow, and links
+     --white-90 / 60 / 30:  White at various opacities for text hierarchy
+
+   BACKGROUND EFFECTS (layered bottom to top):
+     1. Navy gradient (body background)
+     2. Animated blue radial glows (body::before) — subtle drifting light
+     3. Faint grid pattern (body::after) — tech/IT texture
+     4. Vignette darkening at edges (.fullscreen::before) — focuses the eye
+   ============================================================================= */
+
+/* --- Google Font: Inter ---
+   Clean, modern sans-serif. Weights loaded: 300-800.
+   Falls back to system fonts if Google Fonts is unavailable. */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+/* --- Reset & Box Sizing --- */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* --- CSS Variables ---
+   Change these to update colors across the entire app. */
 :root {
     --navy: #0a1e3d;
     --navy-light: #112d5a;
     --blue-accent: #4a90d9;
     --white: #ffffff;
-    --white-90: rgba(255, 255, 255, 0.9);
-    --white-60: rgba(255, 255, 255, 0.6);
-    --white-30: rgba(255, 255, 255, 0.3);
-    --success: #34d399;
-    --error: #f87171;
+    --white-90: rgba(255, 255, 255, 0.9);   /* Primary text */
+    --white-60: rgba(255, 255, 255, 0.6);   /* Secondary/muted text */
+    --white-30: rgba(255, 255, 255, 0.3);   /* Borders, dividers */
+    --success: #34d399;                      /* Not currently used in UI */
+    --error: #f87171;                        /* Not currently used in UI */
 }
 
+/* --- Body / Full-Screen Background ---
+   The entire page is one big navy gradient. Position: relative is needed
+   so the ::before and ::after pseudo-elements can layer on top. */
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: linear-gradient(160deg, #061429 0%, var(--navy) 30%, var(--navy-light) 100%);
@@ -31,6 +73,10 @@ body {
     position: relative;
 }
 
+/* --- Background Effect: Animated Blue Glows ---
+   Two soft radial gradients that slowly drift around, giving the background
+   a subtle sense of life. The animation is slow (12 seconds) and gentle
+   so it's never distracting. */
 body::before {
     content: '';
     position: absolute;
@@ -39,11 +85,21 @@ body::before {
     width: 200%;
     height: 200%;
     background:
-        radial-gradient(ellipse at 30% 20%, rgba(74, 144, 217, 0.08) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 80%, rgba(74, 144, 217, 0.05) 0%, transparent 50%);
+        radial-gradient(ellipse at 30% 20%, rgba(74, 144, 217, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 80%, rgba(74, 144, 217, 0.07) 0%, transparent 50%);
     pointer-events: none;
+    animation: gradientDrift 12s ease-in-out infinite alternate;
 }
 
+@keyframes gradientDrift {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(2%, -1%) scale(1.02); }
+    100% { transform: translate(-1%, 2%) scale(1); }
+}
+
+/* --- Background Effect: Grid Texture ---
+   A very faint grid pattern that fades out toward the edges. Gives a subtle
+   tech/IT feel without being distracting. The mask-image creates the fade. */
 body::after {
     content: '';
     position: absolute;
@@ -57,6 +113,20 @@ body::after {
     -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
 }
 
+/* --- Background Effect: Vignette ---
+   Darkens the edges of the screen to naturally draw the eye toward the
+   center where the text is. */
+.fullscreen::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(4, 10, 20, 0.6) 100%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* --- Main Content Container ---
+   Centers everything vertically and horizontally on the screen. */
 .fullscreen {
     width: 100%;
     min-height: 100vh;
@@ -66,61 +136,103 @@ body::after {
     justify-content: center;
     padding: 48px 64px;
     text-align: center;
+    position: relative;
+    z-index: 1;
 }
 
+/* --- School/IT Logo ---
+   The logo image is rendered in white using CSS filters (brightness(0) makes
+   it black, invert(1) flips to white). This means you can use any dark logo
+   on a transparent background and it will appear white on the navy background.
+   To change the logo, just replace static/st_xavier_logo.png. */
 .logo {
     width: 550px;
     height: auto;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
     opacity: 0.9;
     filter: brightness(0) invert(1);
 }
 
+/* --- Divider Line ---
+   A thin gradient line between the logo and the main text. Fades from
+   transparent to white and back, creating a subtle separator. */
+.divider {
+    width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--white-30), transparent);
+    margin-bottom: 28px;
+}
+
+/* --- Main Heading (h1) ---
+   Used for the "Please Check In By Scanning..." text and error heading.
+   The text-shadow adds a very faint blue glow behind the text. */
 h1 {
     font-size: 5.5rem;
     font-weight: 700;
     color: var(--white);
     line-height: 1.25;
     letter-spacing: -0.02em;
+    text-shadow: 0 0 60px rgba(74, 144, 217, 0.15);
 }
 
+/* --- Welcome Heading ---
+   Smaller and lighter than the main h1, so the instruction text
+   ("Please Proceed To The Next Available IT Specialist") is the
+   most prominent element on the success screen. */
 h1.welcome {
     font-size: 4rem;
     font-weight: 500;
     color: var(--white-90);
+    text-shadow: none;
 }
 
+/* --- Instruction Text ---
+   Used on the success and error screens. Same size as h1 so it fills
+   the screen and is readable from a distance. */
 .instruction {
     font-size: 5.5rem;
     font-weight: 600;
     color: var(--white);
     line-height: 1.3;
     margin-top: 28px;
+    text-shadow: 0 0 60px rgba(74, 144, 217, 0.15);
 }
 
-/* Pulsing down arrow */
+/* --- Down Arrow (Triple Chevron) ---
+   Animated arrow pointing down toward the RFID reader. Bobs up and down
+   with a pulsing blue glow to draw attention to the scanner. */
 .arrow-down {
     margin-top: 56px;
     animation: bobDown 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(74, 144, 217, 0.4));
 }
 
 .arrow-down svg {
-    color: var(--white-30);
-    width: 100px;
-    height: 100px;
+    color: var(--blue-accent);
+    width: 120px;
+    height: 120px;
+    opacity: 0.75;
 }
 
+/* The arrow bobs down 14px and the glow intensifies at the midpoint */
 @keyframes bobDown {
-    0%, 100% { transform: translateY(0); opacity: 0.4; }
-    50% { transform: translateY(14px); opacity: 0.9; }
+    0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 12px rgba(74, 144, 217, 0.2)); }
+    50% { transform: translateY(14px); filter: drop-shadow(0 0 20px rgba(74, 144, 217, 0.5)); }
 }
 
-/* Student name highlight */
+/* --- Student Name Highlight ---
+   The student's first name on the success screen is highlighted in blue
+   to stand out from the white text. */
 #student-name {
     color: var(--blue-accent);
 }
 
-/* Closed page */
+/* =============================================================================
+   CLOSED PAGE STYLES
+   ============================================================================= */
+
+/* --- Clock Icon ---
+   A circular container for the clock SVG icon on the closed page. */
 .closed-icon {
     width: 80px;
     height: 80px;
@@ -139,6 +251,8 @@ h1.welcome {
     height: 40px;
 }
 
+/* --- Hours of Operation Box ---
+   A subtle bordered box showing when the helpdesk is open. */
 .hours-box {
     margin-top: 40px;
     padding: 28px 48px;
@@ -163,6 +277,7 @@ h1.welcome {
     line-height: 1.8;
 }
 
+/* --- Help Text / Emergency Contact --- */
 .help-text {
     margin-top: 40px;
     font-size: 1.1rem;
@@ -176,7 +291,12 @@ h1.welcome {
     font-weight: 500;
 }
 
-/* Views */
+/* =============================================================================
+   VIEW SWITCHING & ANIMATIONS
+   ============================================================================= */
+
+/* Only the view with class 'active' is visible. JavaScript swaps
+   this class between check-in, success, and error views. */
 .view {
     display: none;
 }
@@ -188,6 +308,7 @@ h1.welcome {
     animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Smooth fade-up animation when a view becomes active */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -199,7 +320,13 @@ h1.welcome {
     }
 }
 
-/* Hidden RFID Input */
+/* =============================================================================
+   HIDDEN RFID INPUT
+   =============================================================================
+   The RFID reader acts like a keyboard — it "types" the card number into
+   this input field. The field is positioned off-screen so students never
+   see it, but JavaScript keeps it focused so keystrokes go to it.
+   ============================================================================= */
 #rfid-input {
     position: absolute;
     left: -9999px;

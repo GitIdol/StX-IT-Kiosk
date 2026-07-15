@@ -1,3 +1,28 @@
+<!--
+  CHECK-IN PAGE — The main kiosk screen students see when the helpdesk is open.
+
+  This page has THREE views that swap in and out (only one visible at a time):
+    1. check-in-view  — "Please scan your ID badge" prompt (default)
+    2. success-view   — "Welcome, [Name]!" shown after a successful scan
+    3. error-view     — "Badge not recognized" shown when the scan fails
+
+  HOW THE RFID READER WORKS:
+    The RFID reader is a USB device that acts like a keyboard. When a student
+    scans their badge, the reader "types" the card number into the hidden
+    input field (#rfid-input) and presses Enter. The JavaScript listens for
+    the Enter key, grabs the value, and sends it to the server.
+
+  TIMING:
+    - Success screen stays for 7 seconds (enough for freshmen to read)
+    - Error screen stays for 4 seconds
+    - Then both reset back to the check-in prompt automatically
+
+  KIOSK LOCKDOWN:
+    - Keyboard shortcuts (Ctrl, Alt, Cmd) are blocked to prevent exiting
+    - Right-click context menu is disabled
+    - The hidden input field re-focuses itself every 500ms so the RFID
+      reader's "typing" always goes to the right place
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,40 +33,77 @@
 </head>
 <body>
     <div class="fullscreen">
+
+        <!-- School/IT logo — displayed on all views. To change the logo,
+             replace static/st_xavier_logo.png with a new image file. The CSS
+             inverts it to white automatically (filter: brightness(0) invert(1))
+             so use a dark logo on a transparent background. -->
         <img src="{{ url_for('static', filename='st_xavier_logo.png') }}" alt="St. Xavier Logo" class="logo">
 
+        <!-- Decorative line between logo and content -->
+        <div class="divider"></div>
+
+        <!-- ============================================================= -->
+        <!-- VIEW 1: Check-In Prompt (default/idle state)                  -->
+        <!-- ============================================================= -->
         <div id="check-in-view" class="view active">
             <h1>Please Check In By Scanning<br>Your ID Badge On The Reader Below</h1>
+
+            <!-- Animated triple chevron arrow pointing down to the RFID reader.
+                 The CSS makes it bob up and down with a blue glow. -->
             <div class="arrow-down">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <polyline points="19 12 12 19 5 12"/>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 6 12 12 18 6"/>
+                    <polyline points="6 12 12 18 18 12"/>
+                    <polyline points="6 18 12 24 18 18"/>
                 </svg>
             </div>
         </div>
 
+        <!-- ============================================================= -->
+        <!-- VIEW 2: Success (shown for 7 seconds after a valid scan)      -->
+        <!-- ============================================================= -->
         <div id="success-view" class="view">
+            <!-- The student's first name is inserted by JavaScript -->
             <h1 class="welcome">Welcome <span id="student-name"></span>!</h1>
             <p class="instruction">Please Proceed To The Next<br>Available IT Specialist</p>
         </div>
 
+        <!-- ============================================================= -->
+        <!-- VIEW 3: Error (shown for 4 seconds when a scan fails)         -->
+        <!-- ============================================================= -->
         <div id="error-view" class="view">
             <h1>Badge Not Recognized</h1>
             <p class="instruction">Please see an IT specialist<br>for help.</p>
         </div>
 
-        <!-- Hidden input to capture RFID scan -->
+        <!-- Hidden input field that captures the RFID reader's "keyboard" input.
+             It's positioned off-screen so students never see it, but it stays
+             focused so the reader's keystrokes go into it. -->
         <input type="text" id="rfid-input" autocomplete="off" autofocus>
     </div>
 
     <script>
+        // =====================================================================
+        // RFID SCAN HANDLER
+        // =====================================================================
+        // This script manages the three views and communicates with the server.
+        // The RFID reader acts like a keyboard — it types the card number and
+        // presses Enter. We listen for that Enter key to trigger the scan.
+        // =====================================================================
+
+        // --- DOM Elements ---
         const rfidInput = document.getElementById('rfid-input');
         const checkInView = document.getElementById('check-in-view');
         const successView = document.getElementById('success-view');
         const errorView = document.getElementById('error-view');
         const studentName = document.getElementById('student-name');
 
+        // Prevents double-scans while a request is being processed
         let isProcessing = false;
+
+        // --- View Management ---
+        // Only one view is visible at a time. The 'active' CSS class controls visibility.
 
         function showView(view) {
             checkInView.classList.remove('active');
@@ -50,6 +112,7 @@
             view.classList.add('active');
         }
 
+        // Reset to the check-in prompt (called after success/error timeout)
         function resetToCheckIn() {
             rfidInput.value = '';
             rfidInput.focus();
@@ -57,19 +120,25 @@
             showView(checkInView);
         }
 
+        // Show the success screen with the student's first name
         function showSuccess(firstname) {
             studentName.textContent = firstname;
             showView(successView);
-            setTimeout(resetToCheckIn, 7000);
+            setTimeout(resetToCheckIn, 7000);  // Return to check-in after 7 seconds
         }
 
+        // Show the error screen
         function showError() {
             showView(errorView);
-            setTimeout(resetToCheckIn, 4000);
+            setTimeout(resetToCheckIn, 4000);  // Return to check-in after 4 seconds
         }
 
+        // --- Server Communication ---
+        // Send the scanned card number to the /process_rfid endpoint on the server.
+        // The server looks up the student and creates a Freshdesk ticket.
+
         async function processRFID(rfid) {
-            if (isProcessing) return;
+            if (isProcessing) return;  // Ignore if we're already processing a scan
             isProcessing = true;
 
             try {
@@ -82,16 +151,20 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    showSuccess(data.firstname);
+                    showSuccess(data.firstname);   // Show "Welcome, [Name]!"
                 } else {
-                    showError();
+                    showError();                    // Show "Badge Not Recognized"
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showError();
+                showError();                        // Network/server error
             }
         }
 
+        // --- Event Listeners ---
+
+        // The RFID reader "types" the card number then presses Enter.
+        // We listen for that Enter key to trigger the scan.
         rfidInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 const rfid = rfidInput.value.trim();
@@ -101,6 +174,7 @@
             }
         });
 
+        // Backup listener in case the reader triggers a 'change' event instead
         rfidInput.addEventListener('change', function() {
             const rfid = rfidInput.value.trim();
             if (rfid) {
@@ -108,20 +182,27 @@
             }
         });
 
+        // Keep the hidden input focused so the RFID reader's keystrokes
+        // always go to the right place. Checks every 500ms.
         setInterval(() => {
             if (document.activeElement !== rfidInput && !isProcessing) {
                 rfidInput.focus();
             }
         }, 500);
 
+        // --- Kiosk Lockdown ---
+        // Block keyboard shortcuts (Ctrl+W, Alt+F4, etc.) to prevent
+        // students from accidentally (or intentionally) exiting the app.
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey || e.altKey || e.metaKey) {
                 e.preventDefault();
             }
         });
 
+        // Disable right-click context menu
         document.addEventListener('contextmenu', e => e.preventDefault());
 
+        // Start in the check-in view
         resetToCheckIn();
     </script>
 </body>

@@ -1,69 +1,80 @@
 # St. Xavier IT Helpdesk Check-In Kiosk
 
-A simple check-in kiosk for the St. Xavier High School IT Help Desk. Students scan their RFID badge, and the app automatically creates a Freshdesk ticket.
+A check-in kiosk for the St. Xavier High School IT Help Desk. Students scan their RFID badge, and the app automatically creates a Freshdesk support ticket.
+
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                     KIOSK PC                            │
+│                                                         │
+│  ┌──────────┐    ┌──────────┐    ┌───────────────────┐  │
+│  │   RFID   │───>│  Chrome  │───>│   Kiosk_App.exe   │  │
+│  │  Reader  │    │ (Kiosk   │    │  (Flask/Waitress)  │  │
+│  │          │    │  Mode)   │    │                    │  │
+│  └──────────┘    └──────────┘    └─────────┬─────────┘  │
+│                                            │            │
+└────────────────────────────────────────────│────────────┘
+                                             │
+                          ┌──────────────────┼──────────────────┐
+                          │                  │                  │
+                          ▼                  ▼                  ▼
+                   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
+                   │  Student DB │   │  Office 365  │   │  Freshdesk  │
+                   │ (PostgreSQL)│   │    (SMTP)    │   │  (Tickets)  │
+                   └─────────────┘   └─────────────┘   └─────────────┘
+```
+
+**The RFID reader acts like a keyboard** — when a student scans their badge, the reader "types" the card number into the app and presses Enter. No special drivers or SDK needed.
 
 ## How It Works
 
-1. Student scans their ID badge on the RFID reader
-2. App queries the school database to get the student's email and name
-3. App sends an email to Freshdesk, auto-creating a ticket
-4. IT staff sees the ticket and can quickly add issue details
+1. Student walks up to the kiosk and scans their ID badge on the RFID reader
+2. The app queries the school's PostgreSQL database to find the student's email and name
+3. The app sends an email to Freshdesk, which automatically creates a support ticket
+4. The student sees a "Welcome" message and is directed to the next available IT specialist
+5. After 7 seconds, the screen resets and is ready for the next student
 
-## Setup
+Outside of helpdesk hours, the kiosk automatically shows a "Closed" screen with the hours of operation. It switches back to the check-in screen when the helpdesk opens — no manual intervention needed.
 
-### Prerequisites
-
-- Windows PC with Python 3.10+
-- PostgreSQL ODBC driver installed
-- Chrome browser installed
-- RFID badge reader (acts as keyboard input)
-
-### Installation
-
-1. Clone this repository
-2. Copy `.env.template` to `.env` and fill in credentials:
-   ```
-   cp .env.template .env
-   ```
-3. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-4. Run the app:
-   ```
-   python app.py
-   ```
-
-### Building the EXE
-
-The app can be built as a standalone Windows executable using PyInstaller:
+## Project Structure
 
 ```
-pip install pyinstaller
-pyinstaller --onefile --add-data "templates;templates" --add-data "static;static" --add-data ".env;." --name Kiosk_App app.py
+StX-IT-Kiosk/
+├── app.py                      # Main application — all backend logic
+├── .env.template               # Template for credentials (copy to .env)
+├── .env                        # Actual credentials (NOT in repo, kiosk PC only)
+├── requirements.txt            # Python dependencies
+├── static/
+│   ├── styles.css              # All styling — colors, sizes, animations
+│   └── st_xavier_logo.png      # School/IT logo (white on transparent)
+├── templates/
+│   ├── check_in.html           # Main kiosk screen (scan + success + error views)
+│   └── closed.html             # Shown outside helpdesk hours
+└── .github/
+    └── workflows/
+        └── build-exe.yml       # GitHub Actions — auto-builds the Windows exe
 ```
-
-Or simply push a version tag (e.g., `v2.0`) to trigger the GitHub Actions workflow.
 
 ## Configuration
 
-All configuration is done via the `.env` file:
+All configuration is done via the `.env` file. The app will not start without the required credentials.
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SMTP_SERVER` | SMTP server for sending emails | smtp.office365.com |
-| `SMTP_PORT` | SMTP port | 587 |
-| `SMTP_USER` | SMTP username | - |
-| `SMTP_PASSWORD` | SMTP password | - |
-| `FRESHDESK_EMAIL` | Email that creates Freshdesk tickets | helpdesk@stxavier.org |
-| `DB_SERVER` | Database server | your-db-host.your-school.org |
-| `DB_DATABASE` | Database name | your_database |
-| `DB_USERNAME` | Database username | report |
-| `DB_PASSWORD` | Database password | report |
-| `DB_DRIVER` | ODBC driver name | {PostgreSQL Unicode(x64)} |
-| `OPEN_HOUR` | Hour helpdesk opens (24h) | 7 |
-| `CLOSE_HOUR` | Hour helpdesk closes (24h) | 16 |
-| `OPEN_DAYS` | Days open (0=Mon, 4=Fri) | 0,1,2,3,4 |
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `SMTP_SERVER` | SMTP server for sending emails | smtp.office365.com | |
+| `SMTP_PORT` | SMTP port | 587 | |
+| `SMTP_USER` | SMTP login username | — | Yes |
+| `SMTP_PASSWORD` | SMTP login password | — | Yes |
+| `FRESHDESK_EMAIL` | Email that auto-creates Freshdesk tickets | helpdesk@stxavier.org | |
+| `DB_SERVER` | PostgreSQL database server | your-db-host.your-school.org | |
+| `DB_DATABASE` | Database name | your_database | |
+| `DB_USERNAME` | Database login username | — | Yes |
+| `DB_PASSWORD` | Database login password | — | Yes |
+| `DB_DRIVER` | ODBC driver name | {PostgreSQL Unicode(x64)} | |
+| `OPEN_HOUR` | Hour helpdesk opens (24h format) | 7 | |
+| `CLOSE_HOUR` | Hour helpdesk closes (24h format) | 16 | |
+| `OPEN_DAYS` | Days open (0=Mon, 1=Tue, ..., 4=Fri) | 0,1,2,3,4 | |
 
 ## Deployment
 
@@ -99,14 +110,119 @@ All configuration is done via the `.env` file:
 - The PostgreSQL ODBC driver (`PostgreSQL Unicode(x64)`) must be installed on the kiosk PC
 - Logs are written to `kiosk.log` in the same directory as the exe
 
+## Building a New Release
+
+This project uses GitHub Actions to automatically build the Windows exe. The process is:
+
+1. Make your code changes and commit them:
+   ```
+   git add .
+   git commit -m "Description of changes"
+   git push origin main
+   ```
+2. When you're ready to release, create a version tag and push it:
+   ```
+   git tag v2.4
+   git push origin v2.4
+   ```
+3. The GitHub Actions workflow automatically:
+   - Sets up a Windows environment with Python 3.10
+   - Installs all dependencies
+   - Builds the exe with PyInstaller
+   - Creates a GitHub Release with the exe and .env.template attached
+4. On the kiosk PC, download the new exe from the Releases page and replace the old one
+
+**Key distinction:** Pushing code (`git push`) does NOT trigger a build. Only pushing a version tag (`git push origin v2.x`) triggers the build. You can push as many commits as you want and only build when you're ready.
+
+## Making Changes
+
+This app is simple by design — all the logic is in a handful of well-commented files. Here's where to look for common changes:
+
+| What you want to change | Where to look |
+|--------------------------|---------------|
+| Colors, fonts, sizes | `static/styles.css` — see the top comment block for key values |
+| Logo | Replace `static/st_xavier_logo.png` (use a dark image on transparent background) |
+| Screen text or layout | `templates/check_in.html` or `templates/closed.html` |
+| Helpdesk hours/schedule | `.env` file on the kiosk PC (OPEN_HOUR, CLOSE_HOUR, OPEN_DAYS) |
+| Email/ticket behavior | `app.py` — look at the `send_email()` and `process_rfid()` functions |
+| Database query | `app.py` — look at `get_user_info_from_cardnumber()` |
+| Success screen duration | `templates/check_in.html` — search for `setTimeout` (currently 7000ms) |
+
+### Using AI-Assisted Coding Tools
+
+The easiest way to make changes to this project is to use an AI-assisted coding tool. These tools can read the entire codebase, understand how everything connects, and help you make changes confidently — even if you're not a developer.
+
+**Recommended approach:**
+1. Clone or download this repository to your computer
+2. Open it in one of these tools:
+   - [Claude Code](https://claude.ai/claude-code) by Anthropic (CLI or IDE extension) — point it at the project folder and describe what you want to change
+   - [GitHub Copilot](https://github.com/features/copilot) — works inside VS Code
+   - [Cursor](https://cursor.com) — an AI-first code editor
+3. Describe what you want to change in plain English (e.g., "change the helpdesk hours to 8 AM - 3 PM" or "make the logo bigger")
+4. Review the suggested changes, test locally, then commit and push
+
+Every file in this project is thoroughly commented to help both humans and AI tools understand what each piece does and why.
+
+## Development Setup (Running Locally)
+
+If you want to run the app on your own machine for testing:
+
+### Prerequisites
+
+- Python 3.9+ installed
+- PostgreSQL ODBC driver installed:
+  - **Windows:** `PostgreSQL Unicode(x64)` — download from [postgresql.org](https://www.postgresql.org/ftp/odbc/versions/)
+  - **macOS (Homebrew):** `brew install unixodbc psqlodbc`
+- Chrome browser installed
+- Network access to the school database server (must be on the correct VLAN)
+
+### Steps
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/GitIdol/StX-IT-Kiosk.git
+   cd StX-IT-Kiosk
+   ```
+2. Copy `.env.template` to `.env` and fill in credentials:
+   ```
+   cp .env.template .env
+   ```
+3. On macOS, change the DB driver in `.env`:
+   ```
+   DB_DRIVER={PostgreSQL Unicode}
+   ```
+4. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+5. Run the app:
+   ```
+   python app.py
+   ```
+6. Open http://localhost:5000 in a browser (or Chrome will open automatically in kiosk mode)
+
+**Note:** Port 5000 may be used by AirPlay on macOS. If so, either disable AirPlay Receiver in System Settings, or modify the port in `app.py`.
+
 ## Troubleshooting
 
-**App crashes or freezes:** Reboot the PC. The app is designed to auto-restart on boot.
+**App won't start — "SMTP credentials not configured":**
+The `.env` file is missing or doesn't have `SMTP_USER` and `SMTP_PASSWORD` filled in. See the Configuration section above.
 
-**Badge not recognized:** The student's card may not be in the database, or there may be a database connection issue. Check `kiosk.log` for details.
+**App won't start — "Database credentials not configured":**
+Same as above, but for `DB_USERNAME` and `DB_PASSWORD`.
 
-**Email not sending:** Check SMTP credentials in `.env`. Verify the Office 365 account is active.
+**App crashes or freezes:**
+Reboot the PC. The app is configured to auto-restart on boot. Check `kiosk.log` for error details.
+
+**Badge not recognized:**
+The student's card may not be in the database, or there may be a database connection issue. Check `kiosk.log` for details.
+
+**Email not sending:**
+Check SMTP credentials in `.env`. Verify the Office 365 account is active and the password hasn't expired.
+
+**Page shows "Closed" during business hours:**
+Check that `OPEN_HOUR`, `CLOSE_HOUR`, and `OPEN_DAYS` are set correctly in the `.env` file. Remember: hours are in 24-hour format, and days use 0=Monday through 6=Sunday.
 
 ## License
 
-Internal use only - St. Xavier High School IT Department
+Internal use only — St. Xavier High School IT Department
