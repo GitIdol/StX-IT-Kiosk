@@ -114,9 +114,11 @@ def is_helpdesk_open():
     configured in the .env file (OPEN_HOUR, CLOSE_HOUR, OPEN_DAYS).
 
     Returns True if the current day and hour fall within operating hours.
-    The main route (/) uses this to decide which page to show.
-    The closed.html page auto-refreshes every 60 seconds so it will
-    automatically switch to the check-in page when the helpdesk opens.
+    The main route (/) uses this to pick which page to show on load, and the
+    /health endpoint exposes it so each kiosk page can re-check the schedule on
+    its own and switch over when it changes — in both directions:
+      - closed.html auto-refreshes every 60s  -> switches to check-in at opening
+      - check_in.html polls /health every 60s  -> switches to closed at closing
     """
     now = datetime.now()
     current_day = now.weekday()   # 0=Monday, 6=Sunday
@@ -322,8 +324,12 @@ def index():
     where students scan their badge.
 
     If the helpdesk is closed: shows the closed screen (closed.html)
-    with hours of operation. That page auto-refreshes every 60 seconds
-    so it will automatically switch to check-in when the helpdesk opens.
+    with hours of operation.
+
+    Each page re-checks the schedule on its own, so the kiosk switches
+    automatically in both directions without anyone touching it:
+    closed.html auto-refreshes every 60s and flips to check-in at opening;
+    check_in.html polls /health every 60s and flips to closed at closing.
 
     The hours shown on the closed page are generated from the schedule in
     .env, so changing OPEN_HOUR/CLOSE_HOUR/OPEN_DAYS updates the display
@@ -398,6 +404,11 @@ def health():
     Health check endpoint. Hit http://localhost:5000/health to verify
     the app is running and see if the helpdesk is currently open.
     Useful for monitoring and troubleshooting.
+
+    Also load-bearing for the UI: check_in.html polls this endpoint every
+    60 seconds and reloads (switching to the closed screen) once
+    'helpdesk_open' turns false. If you change this endpoint, keep the
+    'helpdesk_open' field in the response or that auto-switch will break.
     """
     return jsonify({
         'status': 'healthy',

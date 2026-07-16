@@ -8,7 +8,9 @@
     The <meta http-equiv="refresh" content="60"> tag makes the browser reload
     this page every 60 seconds. When the helpdesk opens (e.g., 7:00 AM on
     Monday), the server will serve check_in.html instead, so the page
-    automatically switches without anyone touching it.
+    automatically switches without anyone touching it. (The reverse switch —
+    check-in to closed at closing time — is handled by check_in.html, which
+    polls /health and reloads.)
 
   STYLING:
     Uses the same full-screen navy background and white text as the check-in

@@ -22,6 +22,13 @@
     - Right-click context menu is disabled
     - The hidden input field re-focuses itself every 500ms so the RFID
       reader's "typing" always goes to the right place
+
+  SCHEDULE AUTO-SWITCH:
+    - The server only picks check-in vs. closed on a full page load, and this
+      page never reloads on its own. So it polls /health every 60 seconds and
+      reloads once the helpdesk has closed — at which point the server serves
+      the closed screen. It reloads only while idle (not mid-scan) so a student
+      is never interrupted. (closed.html handles the reverse via auto-refresh.)
 -->
 <!DOCTYPE html>
 <html lang="en">

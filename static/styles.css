@@ -11,11 +11,14 @@
      on the kiosk's 21.5" 1920x1080 display.
 
    KEY SIZING VALUES (adjust these if changing displays):
-     Logo width:       550px   (.logo)
-     Main text:        5.5rem  (h1)
+     Logo width:       550px   (.logo)        — shared by both pages
+     Main text:        5.5rem  (h1)           — also the "Currently Closed" headline
      Welcome text:     4rem    (h1.welcome)
      Instruction text: 5.5rem  (.instruction)
      Arrow size:       120px   (.arrow-down svg)
+     Closed hours:     3rem    (.hours-text)  — the hours on the closed screen
+     Closed label:     1.6rem  (.hours-label)
+     Closed help text: 1.75rem (.help-text)
 
    COLOR PALETTE:
      --navy (#0a1e3d):       Dark navy blue — primary background
