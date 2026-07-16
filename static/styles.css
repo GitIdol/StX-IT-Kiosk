@@ -115,12 +115,14 @@ body::after {
 
 /* --- Background Effect: Vignette ---
    Darkens the edges of the screen to naturally draw the eye toward the
-   center where the text is. */
+   center where the text is. The final alpha value below controls how heavy
+   it is — higher = darker edges. Backed off from 0.6 to 0.4 so the display
+   reads lighter and less heavy. */
 .fullscreen::before {
     content: '';
     position: fixed;
     inset: 0;
-    background: radial-gradient(ellipse at center, transparent 40%, rgba(4, 10, 20, 0.6) 100%);
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(4, 10, 20, 0.4) 100%);
     pointer-events: none;
     z-index: 0;
 }
