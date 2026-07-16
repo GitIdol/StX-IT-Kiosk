@@ -190,6 +190,32 @@
             }
         }, 500);
 
+        // --- Schedule Auto-Switch ---
+        // The server only decides check-in vs. closed on a full page load. This
+        // page loads once when the kiosk boots and never reloads on its own, so
+        // without this it would keep showing the check-in prompt all night and
+        // never switch to the Closed screen when the helpdesk closes. (The
+        // Closed page handles the reverse itself — it auto-refreshes and returns
+        // to check-in at opening time.)
+        //
+        // Every 60 seconds we ask the server whether the helpdesk is still open
+        // and reload only if it has closed — at which point the server serves
+        // closed.html. We reload only while idle (not mid-scan, and only from
+        // the check-in prompt) so a student is never interrupted.
+        setInterval(async () => {
+            if (isProcessing) return;                              // don't interrupt an active scan
+            if (!checkInView.classList.contains('active')) return; // wait for the idle prompt
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                if (!data.helpdesk_open) {
+                    location.reload();  // server will now serve the Closed screen
+                }
+            } catch (error) {
+                // Transient error (e.g. server busy) — just try again next cycle.
+            }
+        }, 60000);
+
         // --- Kiosk Lockdown ---
         // Block keyboard shortcuts (Ctrl+W, Alt+F4, etc.) to prevent
         // students from accidentally (or intentionally) exiting the app.
