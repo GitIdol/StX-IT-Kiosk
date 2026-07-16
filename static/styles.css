@@ -233,58 +233,44 @@ h1.welcome {
    CLOSED PAGE STYLES
    ============================================================================= */
 
-/* --- Clock Icon ---
-   A circular container for the clock SVG icon on the closed page. */
-.closed-icon {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid var(--white-30);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 40px;
-    color: var(--white-60);
-}
-
-.closed-icon svg {
-    width: 40px;
-    height: 40px;
-}
-
 /* --- Hours of Operation Box ---
-   A subtle bordered box showing when the helpdesk is open. */
+   A subtle bordered box showing when the helpdesk is open. This is the key
+   takeaway on the Closed screen — when a student can come back — so the hours
+   themselves are the second-most-prominent element after the headline. Sizes
+   are scaled up from the old small defaults to be legible at a glance from a
+   few feet away, matching the check-in page's readable-from-a-distance feel. */
 .hours-box {
-    margin-top: 40px;
-    padding: 28px 48px;
+    margin-top: 44px;
+    padding: 36px 64px;
     border: 1px solid var(--white-30);
-    border-radius: 20px;
+    border-radius: 24px;
     background: rgba(255, 255, 255, 0.05);
 }
 
 .hours-label {
-    font-size: 0.85rem;
+    font-size: 1.6rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--white-60);
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
 .hours-text {
-    font-size: 1.4rem;
-    font-weight: 500;
+    font-size: 3rem;
+    font-weight: 600;
     color: var(--white-90);
-    line-height: 1.8;
+    line-height: 1.45;
 }
 
-/* --- Help Text / Emergency Contact --- */
+/* --- Help Text / Emergency Contact ---
+   Tertiary info — kept clearly smaller than the hours, but still readable
+   from a distance (the old 1.1rem was far too small on the 1080p display). */
 .help-text {
-    margin-top: 40px;
-    font-size: 1.1rem;
+    margin-top: 44px;
+    font-size: 1.75rem;
     color: var(--white-60);
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 .help-text a {
