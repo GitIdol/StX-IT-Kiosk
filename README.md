@@ -66,7 +66,7 @@ All configuration is done via the `.env` file. The app will not start without th
 | `SMTP_PORT` | SMTP port | 587 | |
 | `SMTP_USER` | SMTP login username | — | Yes |
 | `SMTP_PASSWORD` | SMTP login password | — | Yes |
-| `FRESHDESK_EMAIL` | Email that auto-creates Freshdesk tickets | helpdesk@stxavier.org | |
+| `FRESHDESK_EMAIL` | Email that auto-creates Freshdesk tickets | helpdesk@your-school.org | |
 | `DB_SERVER` | PostgreSQL database server | your-db-host.your-school.org | |
 | `DB_DATABASE` | Database name | your_database | |
 | `DB_USERNAME` | Database login username | — | Yes |
