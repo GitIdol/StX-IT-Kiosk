@@ -79,7 +79,7 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 # --- Email / SMTP Settings ---
 # The app sends emails to Freshdesk to create support tickets.
 # It uses Office 365 SMTP (or whatever server is configured).
-FRESHDESK_EMAIL = os.getenv('FRESHDESK_EMAIL', 'helpdesk@stxavier.org')  # Recipient: where tickets are created
+FRESHDESK_EMAIL = os.getenv('FRESHDESK_EMAIL', 'helpdesk@your-school.org')  # Recipient: where tickets are created
 SMTP_SERVER = os.getenv('SMTP_SERVER', 'smtp.office365.com')             # Mail server hostname
 SMTP_PORT = int(os.getenv('SMTP_PORT', '587'))                          # Mail server port (587 = TLS)
 SMTP_USER = os.getenv('SMTP_USER')                                      # Login username (REQUIRED)

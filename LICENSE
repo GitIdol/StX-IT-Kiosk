@@ -1,0 +1,26 @@
+Copyright (c) 2025-2026 St. Xavier High School IT Department.
+All rights reserved.
+
+INTERNAL USE ONLY
+
+This software was built for, and is operated by, the St. Xavier High School
+IT Department. No license is granted to use, copy, modify, distribute, or
+create derivative works from it for any other purpose without prior written
+permission.
+
+WHY THE SOURCE IS PUBLIC
+
+The repository is readable on purpose. The application was designed from the
+outset to be maintainable by whoever holds the role next — with or without the
+original author, and with or without a software background. Publishing the
+source, the architecture notes, and the deployment steps is what makes that
+true. It is published for reference and continuity, not for reuse.
+
+NO WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
